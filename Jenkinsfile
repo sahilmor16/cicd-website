@@ -12,13 +12,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t cicd-website .'
+                bar 'docker build -t cicd-website .'
             }
         }
 
         stage('Stop Old Container') {
             steps {
-                sh '''
+                bat '''
                 docker stop cicd-container || true
                 docker rm cicd-container || true
                 '''
@@ -27,7 +27,7 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
-                sh 'docker run -d -p 8081:80 --name cicd-container cicd-website'
+                bat 'docker run -d -p 8081:80 --name cicd-container cicd-website'
             }
         }
     }
