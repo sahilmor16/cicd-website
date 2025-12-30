@@ -1,37 +1,56 @@
 pipeline {
     agent any
 
-    stages {
+    environment {
+        IMAGE_NAME = "cicd-website"
+        CONTAINER_NAME = "cicd-container"
+        PORT = "8081"
+    }
 
-        stage('Clone Repository') {
+    stages {
+        stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                url: 'https://github.com/sahilmor16/cicd-website.git'
+                echo "Cloning repository..."
+                git branch: 'main', url: 'https://github.com/sahilmor16/cicd-website.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t cicd-website .'
+                echo "Building Docker image..."
+                bat """
+                docker build -t %IMAGE_NAME% .
+                """
             }
         }
 
         stage('Stop Old Container') {
             steps {
-                bat '''
+                echo "Stopping old container if exists..."
+                bat """
                 @echo off
-                docker stop cicd-container
-                IF %ERRORLEVEL% NEQ 0 echo "Container not running"
-                docker rm cicd-container
-                IF %ERRORLEVEL% NEQ 0 echo "Container not exists"
-                '''
+                docker stop %CONTAINER_NAME% 2>NUL || echo Container not running
+                docker rm %CONTAINER_NAME% 2>NUL || echo Container not exists
+                """
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                bat 'docker run -d -p 8081:80 --name cicd-container cicd-website'
+                echo "Running new Docker container..."
+                bat """
+                docker run -d -p %PORT%:80 --name %CONTAINER_NAME% %IMAGE_NAME%
+                """
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline finished successfully! 🎉"
+        }
+        failure {
+            echo "Pipeline failed. ❌ Check logs for details."
         }
     }
 }
