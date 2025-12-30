@@ -29,8 +29,15 @@ pipeline {
                 echo "Stopping old container if exists..."
                 bat """
                 @echo off
-                docker stop %CONTAINER_NAME% 2>NUL || echo Container not running
-                docker rm %CONTAINER_NAME% 2>NUL || echo Container not exists
+                docker ps -q -f name=%CONTAINER_NAME% > temp.txt
+                set /p CONTAINER_ID=<temp.txt
+                if defined CONTAINER_ID (
+                    docker stop %CONTAINER_NAME%
+                    docker rm %CONTAINER_NAME%
+                ) else (
+                    echo No running container to stop or remove
+                )
+                del temp.txt
                 """
             }
         }
