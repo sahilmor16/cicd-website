@@ -12,7 +12,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bar 'docker build -t cicd-website .'
+                bat 'docker build -t cicd-website .'
             }
         }
 
