@@ -19,8 +19,11 @@ pipeline {
         stage('Stop Old Container') {
             steps {
                 bat '''
-                docker stop cicd-container || true
-                docker rm cicd-container || true
+                @echo off
+                docker stop cicd-container
+                IF %ERRORLEVEL% NEQ 0 echo "Container not running"
+                docker rm cicd-container
+                IF %ERRORLEVEL% NEQ 0 echo "Container not exists"
                 '''
             }
         }
